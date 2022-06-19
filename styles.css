@@ -12,16 +12,17 @@ body {
   align-items: center;
 }
 .calculator {
-  height: 50vh;
-  width: 50vw;
+  min-height: 50vh;
+  min-width: 50vw;
   margin: 0 auto;
   display: grid;
-  grid-template-rows: 1fr 2fr;
+  grid-template-rows: 1fr 1fr 2fr;
   justify-content: center;
   align-items: center;
 }
 
-.output {
+.output,
+.calculation {
   font-size: 3rem;
   padding: 1rem;
   text-align: center;

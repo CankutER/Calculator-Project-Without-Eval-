@@ -1,13 +1,19 @@
 const nums = document.querySelectorAll(".num");
 const funcBtns = document.querySelectorAll(".func");
 const output = document.querySelector(".output");
+const calculation = document.querySelector(".calculation");
 const equals = document.querySelector(".equals");
+const paranthOpen = document.querySelector(".paranthOpen");
+const paranthClose = document.querySelector(".paranthClose");
+const buttons = document.querySelectorAll(".button");
 // const multiply = document.querySelectorAll(".multiply");
 // const subtract = document.querySelectorAll(".subtract");
 // const equals = document.querySelectorAll(".equals");
-
+let paranthFlag = false;
 let stack = [];
+let paranthStack = [];
 let stage = [];
+let display = [];
 // output.textContent = stack[0];
 
 function calc(stack) {
@@ -74,6 +80,43 @@ const solveStack = function (input) {
     return result;
   }
 };
+const solveParanthStack = function (input) {
+  let length = paranthStack.length;
+
+  let result;
+  if (input === "*" || input === "/") {
+    if (paranthStack[length - 2] === "*") {
+      const value = paranthStack[length - 3] * paranthStack[length - 1];
+      paranthStack.splice(length - 3);
+      paranthStack.push(value);
+      paranthStack.push(input);
+      result = value;
+      output.textContent = result;
+      return result;
+    } else if (paranthStack[length - 2] === "/") {
+      const value = paranthStack[length - 3] / paranthStack[length - 1];
+      paranthStack.splice(length - 3);
+      paranthStack.push(value);
+      paranthStack.push(input);
+      result = value;
+      output.textContent = result;
+      return result;
+    } else {
+      paranthStack.push(input);
+    }
+  } else if (input === "+" || input === "-") {
+    let singleValue = calc(paranthStack);
+
+    paranthStack = [];
+
+    paranthStack.push(singleValue);
+
+    paranthStack.push(input);
+    result = singleValue;
+    output.textContent = result;
+    return result;
+  }
+};
 
 nums.forEach((num) => {
   num.addEventListener("click", () => {
@@ -85,26 +128,92 @@ nums.forEach((num) => {
 
 funcBtns.forEach((func) => {
   func.addEventListener("click", () => {
-    if (
-      window.isNaN(stack[stack.length - 1]) &&
-      stack.length !== 0 &&
-      stage.length === 0
-    ) {
-      stack[stack.length - 1] = func.textContent;
-    } else if (stage.length !== 0 && stack.length === 1) {
-      let num = Number(stage.join(""));
-      stage = [];
-      stack[0] = num;
-    } else if (stage.length === 0 && stack.length === 1) {
-      solveStack(func.textContent);
-    } else {
-      let num = Number(stage.join(""));
-      stage = [];
-      stack.push(num);
-      console.log(stack);
-      console.log(solveStack(func.textContent));
-      console.log(stack);
+    if (!paranthFlag) {
+      if (
+        window.isNaN(stack[stack.length - 1]) &&
+        stack.length !== 0 &&
+        stage.length === 0
+      ) {
+        if (stack[stack.length - 1] === "+" || "-") {
+          stack[stack.length - 1] = func.textContent;
+          display.unshift("(");
+          display[display.length - 1] = ")";
+          display.push(func.textContent);
+        } else {
+          stack[stack.length - 1] = func.textContent;
+          display[display.length - 1] = func.textContent;
+        }
+      } else if (stage.length !== 0 && stack.length === 1) {
+        let num = Number(stage.join(""));
+        stage = [];
+        stack[0] = num;
+        solveStack(func.textContent);
+        display = [];
+        display.push(num);
+        display.push(func.textContent);
+      } else if (stage.length === 0 && stack.length === 1) {
+        solveStack(func.textContent);
+        display.push(stack[0]);
+        display.push(func.textContent);
+      } else if (
+        stage.length === 0 &&
+        stack.length > 1 &&
+        !window.isNaN(stack[stack.length - 1])
+      ) {
+        solveStack(func.textContent);
+        display.push(func.textContent);
+      } else {
+        let num = Number(stage.join(""));
+        display.push(num);
+        display.push(func.textContent);
+        stage = [];
+        stack.push(num);
+
+        console.log(solveStack(func.textContent));
+      }
+    } else if (paranthFlag) {
+      if (
+        window.isNaN(paranthStack[paranthStack.length - 1]) &&
+        paranthStack.length !== 0 &&
+        stage.length === 0
+      ) {
+        if (paranthStack[paranthStack.length - 1] === "+" || "-") {
+          paranthStack[paranthStack.length - 1] = func.textContent;
+          display.unshift("(");
+          display[display.length - 1] = ")";
+          display.push(func.textContent);
+        } else {
+          paranthStack[paranthStack.length - 1] = func.textContent;
+          display[display.length - 1] = func.textContent;
+        }
+      } else if (stage.length !== 0 && paranthStack.length === 1) {
+        let num = Number(stage.join(""));
+        stage = [];
+        paranthStack[0] = num;
+        solveParanthStack(func.textContent);
+        display = [];
+        display.push(num);
+        display.push(func.textContent);
+      } else if (stage.length === 0 && paranthStack.length === 1) {
+        solveParanthStack(func.textContent);
+        display.push(paranthStack[0]);
+        display.push(func.textContent);
+      } else if (
+        stage.length === 0 &&
+        paranthStack.length > 1 &&
+        !window.isNaN(paranthStack[paranthStack.length - 1])
+      ) {
+        solveParanthStack(func.textContent);
+        display.push(func.textContent);
+      } else {
+        let num = Number(stage.join(""));
+        display.push(num);
+        display.push(func.textContent);
+        stage = [];
+        paranthStack.push(num);
+      }
     }
+    calculation.textContent = display.join("");
   });
 });
 
@@ -117,14 +226,24 @@ equals.addEventListener("click", () => {
     stack.splice(-1);
     let result = calc(stack);
     output.textContent = result;
+    display[display.length - 1] = "=";
   } else if (stage.length === 0 && stack.length === 0) {
     let result = calc(stack);
     output.textContent = result;
+    display.push(`${Number(stage.join(""))}`);
+    display.push(`=`);
   } else if (stage.length === 0 && !window.isNaN(stack[stack.length - 1])) {
     let result = calc(stack);
+    stack = [];
+    stack.push(result);
     output.textContent = result;
+    display.push(result);
+    display.push("=");
   } else {
     let num = Number(stage.join(""));
+    display.push(stage.join(""));
+    display.push("=");
+
     stage = [];
     stack.push(num);
     let result = calc(stack);
@@ -132,4 +251,50 @@ equals.addEventListener("click", () => {
     stack.push(result);
     output.textContent = result;
   }
+  calculation.textContent = display.join("");
+  display = [];
+});
+
+paranthOpen.addEventListener("click", () => {
+  stage = [];
+  paranthFlag = true;
+  display.push("(");
+  calculation.textContent = display.join("");
+});
+
+paranthClose.addEventListener("click", () => {
+  if (
+    stage.length === 0 &&
+    window.isNaN(paranthStack[paranthStack.length - 1]) &&
+    paranthStack.length !== 0
+  ) {
+    paranthStack.splice(-1);
+    let result = calc(paranthStack);
+    paranthStack = [];
+    output.textContent = result;
+    stack.push(result);
+  } else if (stage.length === 0 && paranthStack.length === 0) {
+    let result = calc(paranthStack);
+    paranthStack = [];
+    output.textContent = result;
+    stack.push(result);
+  } else if (
+    stage.length === 0 &&
+    !window.isNaN(paranthStack[paranthStack.length - 1])
+  ) {
+    let result = calc(paranthStack);
+    paranthStack = [];
+    output.textContent = result;
+    stack.push(result);
+  } else {
+    let num = Number(stage.join(""));
+    stage = [];
+    paranthStack.push(num);
+    let result = calc(paranthStack);
+    paranthStack = [];
+    stack.push(result);
+    output.textContent = result;
+  }
+
+  paranthFlag = false;
 });
