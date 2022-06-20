@@ -12,30 +12,61 @@ body {
   align-items: center;
 }
 .calculator {
-  min-height: 50vh;
-  min-width: 50vw;
   margin: 0 auto;
   display: grid;
-  grid-template-rows: 1fr 1fr 2fr;
   justify-content: center;
   align-items: center;
+  gap: 0;
 }
 
 .output,
 .calculation {
+  width: 30rem;
+  margin: 0;
   font-size: 3rem;
-  padding: 1rem;
+  padding: 0;
+  text-align: center;
+  background-color: #c0c0c0;
+  border: solid 0.1rem black;
+}
+.calculation {
+  font-style: italic;
+  font-size: 2rem;
+  padding: 2.5rem 0;
+  height: 7rem;
+  margin: 0;
+  overflow-y: hidden;
+  overflow-x: auto;
   text-align: center;
 }
 .buttons {
   height: 100%;
-  display: flex;
-  gap: 0.25rem;
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+
+  gap: 0.2rem;
   justify-content: center;
   align-items: center;
+}
+.funcs {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(5, 1fr);
+}
+.nums {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
 }
 
 .button {
   padding: 1.5rem;
   font-size: 1.5rem;
+}
+.AC {
+  background-color: #e9692c;
+  transition: all 0.1s linear;
+}
+.AC:hover {
+  background-color: #ed9121;
 }
