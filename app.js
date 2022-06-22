@@ -16,6 +16,7 @@ let stack = [];
 let paranthStack = [];
 let stage = [];
 let display = [];
+let paranthCount = 0;
 // output.textContent = stack[0];
 
 function calc(stack) {
@@ -83,37 +84,41 @@ const solveStack = function (input) {
   }
 };
 const solveParanthStack = function (input) {
-  let length = paranthStack.length;
+  let innerLength = paranthStack[paranthCount - 1].length;
 
   let result;
   if (input === "*" || input === "/") {
-    if (paranthStack[length - 2] === "*") {
-      const value = paranthStack[length - 3] * paranthStack[length - 1];
-      paranthStack.splice(length - 3);
-      paranthStack.push(value);
-      paranthStack.push(input);
+    if (paranthStack[paranthStack.length - 1][innerLength - 2] === "*") {
+      const value =
+        paranthStack[paranthStack.length - 1][innerLength - 3] *
+        paranthStack[paranthStack.length - 1][innerLength - 1];
+      paranthStack[paranthStack.length - 1].splice(innerLength - 3);
+      paranthStack[paranthStack.length - 1].push(value);
+      paranthStack[paranthStack.length - 1].push(input);
       result = value;
       output.textContent = result;
       return result;
-    } else if (paranthStack[length - 2] === "/") {
-      const value = paranthStack[length - 3] / paranthStack[length - 1];
-      paranthStack.splice(length - 3);
-      paranthStack.push(value);
-      paranthStack.push(input);
+    } else if (paranthStack[paranthStack.length - 1][innerLength - 2] === "/") {
+      const value =
+        paranthStack[paranthStack.length - 1][innerLength - 3] /
+        paranthStack[paranthStack.length - 1][innerLength - 1];
+      paranthStack[paranthStack.length - 1].splice(innerLength - 3);
+      paranthStack[paranthStack.length - 1].push(value);
+      paranthStack[paranthStack.length - 1].push(input);
       result = value;
       output.textContent = result;
       return result;
     } else {
-      paranthStack.push(input);
+      paranthStack[paranthStack.length - 1].push(input);
     }
   } else if (input === "+" || input === "-") {
-    let singleValue = calc(paranthStack);
+    let singleValue = calc(paranthStack[paranthStack.length - 1]);
 
-    paranthStack = [];
+    paranthStack[paranthStack.length - 1] = [];
 
-    paranthStack.push(singleValue);
+    paranthStack[paranthStack.length - 1].push(singleValue);
 
-    paranthStack.push(input);
+    paranthStack[paranthStack.length - 1].push(input);
     result = singleValue;
     output.textContent = result;
     return result;
@@ -182,44 +187,53 @@ funcBtns.forEach((func) => {
         solveStack(func.textContent);
       }
     } else if (paranthFlag) {
+      let innerLength = paranthStack[paranthCount - 1].length;
       if (
-        window.isNaN(paranthStack[paranthStack.length - 1]) &&
-        paranthStack.length !== 0 &&
+        window.isNaN(paranthStack[paranthStack.length - 1][innerLength - 1]) &&
+        paranthStack[paranthStack.length - 1].length !== 0 &&
         stage.length === 0
       ) {
         if (
-          (paranthStack[paranthStack.length - 1] === "+" ||
-            paranthStack[paranthStack.length - 1] === "-") &&
+          (paranthStack[paranthStack.length - 1][innerLength - 1] === "+" ||
+            paranthStack[paranthStack.length - 1][innerLength - 1] === "-") &&
           (func.textContent === "*" || func.textContent === "/")
         ) {
-          paranthStack[paranthStack.length - 1] = func.textContent;
+          paranthStack[paranthStack.length - 1][innerLength - 1] =
+            func.textContent;
           display.unshift("(");
           display[display.length - 1] = ")";
           display.push(func.textContent);
         } else {
-          paranthStack[paranthStack.length - 1] = func.textContent;
+          paranthStack[paranthStack.length - 1][innerLength - 1] =
+            func.textContent;
           display[display.length - 1] = func.textContent;
         }
-      } else if (stage.length !== 0 && paranthStack.length === 1) {
+      } else if (
+        stage.length !== 0 &&
+        paranthStack[paranthStack.length - 1].length === 1
+      ) {
         let num = Number(stage.join(""));
         stage = [];
-        paranthStack[0] = num;
+        paranthStack[paranthStack.length - 1][0] = num;
         solveParanthStack(func.textContent);
         display = [];
         display.push(num);
         display.push(func.textContent);
-      } else if (stage.length === 0 && paranthStack.length === 1) {
+      } else if (
+        stage.length === 0 &&
+        paranthStack[paranthStack.length - 1].length === 1
+      ) {
         solveParanthStack(func.textContent);
         if (display[display.length - 1] === ")") {
           display.push(func.textContent);
         } else {
-          display.push(stack[0]);
+          display.push(paranthStack[paranthStack.length - 1][0]);
           display.push(func.textContent);
         }
       } else if (
         stage.length === 0 &&
-        paranthStack.length > 1 &&
-        !window.isNaN(paranthStack[paranthStack.length - 1])
+        paranthStack[paranthStack.length - 1].length > 1 &&
+        !window.isNaN(paranthStack[paranthStack.length - 1][innerLength - 1])
       ) {
         solveParanthStack(func.textContent);
         display.push(func.textContent);
@@ -228,7 +242,7 @@ funcBtns.forEach((func) => {
         display.push(num);
         display.push(func.textContent);
         stage = [];
-        paranthStack.push(num);
+        paranthStack[paranthStack.length - 1].push(num);
         solveParanthStack(func.textContent);
       }
     }
@@ -283,53 +297,121 @@ equals.addEventListener("click", () => {
 });
 
 paranthOpen.addEventListener("click", () => {
-  stage = [];
-  paranthFlag = true;
-  display.push("(");
-  calculation.textContent = display.join("");
+  if (display[display.length - 1] === ")") {
+    alert("Please use an operator before starting a new paranthesis");
+  } else {
+    paranthFlag = true;
+    paranthCount++;
+    paranthStack.push([]);
+    display.push("(");
+    calculation.textContent = display.join("");
+  }
 });
 
 paranthClose.addEventListener("click", () => {
+  if (paranthCount === 0) {
+    return;
+  }
+  let innerLength = paranthStack[paranthCount - 1].length;
+
   if (
     stage.length === 0 &&
-    window.isNaN(paranthStack[paranthStack.length - 1]) &&
-    paranthStack.length !== 0
+    window.isNaN(paranthStack[paranthStack.length - 1][innerLength - 1]) &&
+    innerLength !== 0
   ) {
-    paranthStack.splice(-1);
-    let result = calc(paranthStack);
-    paranthStack = [];
+    paranthStack[paranthStack.length - 1].splice(-1);
+    let result = calc(paranthStack[paranthStack.length - 1]);
+    paranthStack.pop();
     output.textContent = result;
-    stack.push(result);
+    if (paranthCount > 1) {
+      if (paranthStack[paranthStack.length - 1].length === 1) {
+        paranthStack[paranthStack.length - 1] = result;
+      } else {
+        paranthStack[paranthStack.length - 1].push(result);
+      }
+    } else if (paranthCount === 1) {
+      if (stack.length === 1) {
+        stack[0] = result;
+      } else {
+        stack.push(result);
+      }
+      paranthFlag = false;
+    }
+    paranthCount--;
     display.pop();
-    display.push(")");
-  } else if (stage.length === 0 && paranthStack.length === 0) {
-    let result = calc(paranthStack);
-    paranthStack = [];
-    output.textContent = result;
-    stack.push(result);
     display.push(")");
   } else if (
     stage.length === 0 &&
-    !window.isNaN(paranthStack[paranthStack.length - 1])
+    paranthStack[paranthStack.length - 1].length === 0
   ) {
-    let result = calc(paranthStack);
-    paranthStack = [];
+    let result = calc(paranthStack[paranthStack.length - 1]);
+    paranthStack.pop();
     output.textContent = result;
-    stack.push(result);
+    if (paranthCount > 1) {
+      if (paranthStack[paranthStack.length - 1].length === 1) {
+        paranthStack[paranthStack.length - 1] = result;
+      } else {
+        paranthStack[paranthStack.length - 1].push(result);
+      }
+    } else if (paranthCount === 1) {
+      if (stack.length === 1) {
+        stack[0] = result;
+      } else {
+        stack.push(result);
+      }
+      paranthFlag = false;
+    }
+    paranthCount--;
+    display.push(")");
+  } else if (
+    stage.length === 0 &&
+    !window.isNaN(paranthStack[paranthStack.length - 1][innerLength - 1])
+  ) {
+    let result = calc(paranthStack[paranthStack.length - 1]);
+    paranthStack.pop();
+    output.textContent = result;
+    if (paranthCount > 1) {
+      if (paranthStack[paranthStack.length - 1].length === 1) {
+        paranthStack[paranthStack.length - 1] = result;
+      } else {
+        paranthStack[paranthStack.length - 1].push(result);
+      }
+    } else if (paranthCount === 1) {
+      if (stack.length === 1) {
+        stack[0] = result;
+      } else {
+        stack.push(result);
+      }
+      paranthFlag = false;
+    }
+    paranthCount--;
     display.push(")");
   } else {
     let num = Number(stage.join(""));
     stage = [];
-    paranthStack.push(num);
-    let result = calc(paranthStack);
-    paranthStack = [];
-    stack.push(result);
+    paranthStack[paranthStack.length - 1].push(num);
+    let result = calc(paranthStack[paranthStack.length - 1]);
+    paranthStack.pop();
+    if (paranthCount > 1) {
+      if (paranthStack[paranthStack.length - 1].length === 1) {
+        paranthStack[paranthStack.length - 1] = result;
+      } else {
+        paranthStack[paranthStack.length - 1].push(result);
+      }
+    } else if (paranthCount === 1) {
+      if (stack.length === 1) {
+        stack[0] = result;
+      } else {
+        stack.push(result);
+      }
+      paranthFlag = false;
+    }
+    paranthCount--;
     output.textContent = result;
     display.push(num);
     display.push(")");
   }
 
-  paranthFlag = false;
   calculation.textContent = display.join("");
 });
 
@@ -347,6 +429,7 @@ AC.addEventListener("click", () => {
   stage = [];
   stack = [];
   paranthStack = [];
+  paranthCount = 0;
   paranthFlag = false;
   output.textContent = "0";
   display = [];
