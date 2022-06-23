@@ -127,8 +127,19 @@ const solveParanthStack = function (input) {
 
 nums.forEach((num) => {
   num.addEventListener("click", () => {
-    stage.push(num.textContent);
-    output.textContent = stage.join("");
+    if (
+      output.textContent[output.textContent.length - 1] === "." &&
+      num.textContent === "."
+    ) {
+      return;
+    } else if (stage.length === 0 && num.textContent === ".") {
+      stage.push(0);
+      stage.push(num.textContent);
+      output.textContent = stage.join("");
+    } else {
+      stage.push(num.textContent);
+      output.textContent = stage.join("");
+    }
     // console.log(stage);
   });
 });
