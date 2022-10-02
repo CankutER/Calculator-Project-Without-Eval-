@@ -28,6 +28,7 @@ body {
   text-align: center;
   background-color: #c0c0c0;
   border: solid 0.1rem black;
+  text-overflow: clip;
 }
 .calculation {
   font-style: italic;
@@ -69,4 +70,28 @@ body {
 }
 .AC:hover {
   background-color: #ed9121;
+}
+@media screen and (max-width: 450px) {
+  .button {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  .calculation,
+  .output {
+    width: 20rem;
+    font-size: 1.75rem;
+  }
+  .calculation {
+    height: 4rem;
+    padding: 1rem;
+  }
+}
+@media screen and (max-width: 300px) {
+  .calculation,
+  .output {
+    width: 15rem;
+  }
+  .button {
+    padding: 0.75rem;
+  }
 }
